@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace WindowsFormsApplication1
 {
@@ -57,24 +58,28 @@ namespace WindowsFormsApplication1
             ReadInFile();
             FormatHtml();
            
-            browser.Text = html;
+            //browser.Text = html;
         }
 
         private void FormatHtml()
         {
-            //C: \Users\Denny\Documents\BitchinTestFolder/HelloWorld.html
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.ConformanceLevel = ConformanceLevel.Fragment;
+            XmlReader reader = XmlReader.Create(new StringReader(html), settings);
 
-            //string[] splitHtml = html.Split(new char[] { '<', '>' }, StringSplitOptions.RemoveEmptyEntries);
-            //Get Text between tags
-            List<string> splitHtml = new List<string>();
-            string currentWord = "";
-
-            foreach(char c in html)
+            while (reader.Read())
             {
-                currentWord += c;
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        //Format HTML HERE
+                        break;
 
-            }
-
+                    case XmlNodeType.Text:
+                        browser.Text += reader.Value;
+                        break;
+                }
+            } 
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e) { }

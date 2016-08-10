@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -19,6 +14,9 @@ namespace WindowsFormsApplication1
         string backUrl;
         string forwardUrl;
         string html;
+        Dictionary<string, string> links;
+        List<string> linkText;
+        int linkIterator;
         public Form1()
         {
             InitializeComponent();
@@ -28,11 +26,14 @@ namespace WindowsFormsApplication1
             urlBar.Text = url;
             backUrl = "";
             forwardUrl = "";
+            links = new Dictionary<string, string>();
+            linkIterator = -1;
+            linkText = new List<string>();
 
             browser.ReadOnly = true;
             browser.WordWrap = false;
-            browser.ScrollBars = ScrollBars.Both;
-            browser.TextAlign = HorizontalAlignment.Center;
+            browser.ScrollBars = RichTextBoxScrollBars.Both;
+            browser.SelectionAlignment = HorizontalAlignment.Center;
             browser.Text = "Hello World\r\nThis is your browser speaking";
         }
 
@@ -69,11 +70,17 @@ namespace WindowsFormsApplication1
             NavigateToUrl();
         }
 
-        private void NavigateToUrl()
+        private void NavigateToUrl(string newUrl = null)
         {
+            if (newUrl != null)
+                urlBar.Text = newUrl;
+
             url = urlBar.Text;
             browser.ResetText();
             html = "";
+            linkIterator = -1;
+            linkText = new List<string>();
+            links = new Dictionary<string, string>();
 
             ReadInFile();
             ParseHtml();
@@ -86,21 +93,38 @@ namespace WindowsFormsApplication1
             settings.DtdProcessing = DtdProcessing.Ignore;
             XmlReader reader = XmlReader.Create(new StringReader(html), settings);
 
+            bool insideATag = false;
+            string link;
+            string href="";
             while (reader.Read())
             {
+                
                 switch (reader.NodeType)
                 {
                     case XmlNodeType.Element:
                         //Format HTML HERE
                         browser.Text += FormatHtml(reader.Name);
+                        if (reader.Name == "a")
+                        {
+                            insideATag = true;
+                            href = reader.GetAttribute("href");
+                        }
                         break;
 
                     case XmlNodeType.Text:
                         browser.Text += reader.Value;
+                        if (insideATag)
+                        {
+                            links.Add(reader.Value, href);
+                            linkText.Add(reader.Value);
+                        }
                         break;
 
                     case XmlNodeType.EndElement:
                         browser.Text += EndElement(reader.Name);
+                        if (insideATag && reader.Name == "a")
+                            insideATag = false;
+
                         break;
                 }
             } 
@@ -120,7 +144,7 @@ namespace WindowsFormsApplication1
                     break;
 
                 case "center":
-                    browser.TextAlign = HorizontalAlignment.Left;
+                    browser.SelectionAlignment = HorizontalAlignment.Left;
                     break;
             }
             return "";
@@ -147,7 +171,7 @@ namespace WindowsFormsApplication1
                     browser.Font = new Font(browser.Font.Name, 12, browser.Font.Style);
                     break;
                 case "center":
-                    browser.TextAlign = HorizontalAlignment.Center;
+                    browser.SelectionAlignment = HorizontalAlignment.Center;
                     break;
                 default:
                     return "\r\n";
@@ -225,6 +249,59 @@ namespace WindowsFormsApplication1
                 scriptEnd = html.IndexOf("</script>") + "</script>".Length;
                 html = html.Remove(scriptStart, scriptEnd - scriptStart);
             }
+        }
+
+        private void HighlightText(string word)
+        {
+
+            if (word == "")
+            {
+                return;
+            }
+
+            int s_start = browser.SelectionStart, startIndex = 0, index;
+
+            while ((index = browser.Text.IndexOf(word, startIndex)) != -1)
+            {
+                browser.Select(index, word.Length);
+                browser.SelectionColor = Color.Blue;
+
+                startIndex = index + word.Length;
+            }
+        }
+
+        private void searchText_Click(object sender, EventArgs e)
+        {
+            linkIterator++;
+            if (links.Count == 0)
+                return;
+            if (linkIterator >= links.Count)
+                linkIterator = 0;
+
+            HighlightText(linkText[linkIterator]);
+        }
+
+        private void navigateLink_Click(object sender, EventArgs e)
+        {
+            if (linkIterator == -1)
+                return;
+
+            string newUrl = links[linkText[linkIterator]];
+            if (newUrl.StartsWith("/"))
+            { // Get everything before the first slash, then append
+                string destination = "";
+                //string[] foo = url.Split('.')[url.Split('.').Length - 1].Split('/')[0] + newUrl;
+                string[] pieces = url.Split('.');
+                for (int i = 0; i < pieces.Length-1; i++){
+                    destination += pieces[i]+ "." ;
+                }
+                destination += url.Split('.')[url.Split('.').Length - 1].Split('/')[0]+newUrl;
+                backUrl = url;
+                NavigateToUrl(destination);
+            }
+            else //if(newUrl.StartsWith("http") || newUrl.StartsWith("www"))
+                NavigateToUrl(links[linkText[linkIterator]]);
+
         }
     }
 }

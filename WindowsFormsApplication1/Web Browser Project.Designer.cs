@@ -35,7 +35,9 @@
             this.homeButton = new System.Windows.Forms.ToolStripButton();
             this.urlBar = new System.Windows.Forms.ToolStripTextBox();
             this.goButton = new System.Windows.Forms.ToolStripButton();
-            this.browser = new System.Windows.Forms.TextBox();
+            this.browser = new System.Windows.Forms.RichTextBox();
+            this.searchText = new System.Windows.Forms.Button();
+            this.navigateLink = new System.Windows.Forms.Button();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -104,18 +106,39 @@
             // 
             // browser
             // 
-            this.browser.Location = new System.Drawing.Point(33, 63);
-            this.browser.Multiline = true;
+            this.browser.Location = new System.Drawing.Point(48, 57);
             this.browser.Name = "browser";
-            this.browser.Size = new System.Drawing.Size(580, 399);
+            this.browser.Size = new System.Drawing.Size(639, 427);
             this.browser.TabIndex = 1;
-            this.browser.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            this.browser.Text = "";
+            // 
+            // searchText
+            // 
+            this.searchText.Location = new System.Drawing.Point(237, 28);
+            this.searchText.Name = "searchText";
+            this.searchText.Size = new System.Drawing.Size(99, 23);
+            this.searchText.TabIndex = 2;
+            this.searchText.Text = "Search Links";
+            this.searchText.UseVisualStyleBackColor = true;
+            this.searchText.Click += new System.EventHandler(this.searchText_Click);
+            // 
+            // navigateLink
+            // 
+            this.navigateLink.Location = new System.Drawing.Point(356, 28);
+            this.navigateLink.Name = "navigateLink";
+            this.navigateLink.Size = new System.Drawing.Size(68, 23);
+            this.navigateLink.TabIndex = 3;
+            this.navigateLink.Text = "Navigate";
+            this.navigateLink.UseVisualStyleBackColor = true;
+            this.navigateLink.Click += new System.EventHandler(this.navigateLink_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(735, 517);
+            this.Controls.Add(this.navigateLink);
+            this.Controls.Add(this.searchText);
             this.Controls.Add(this.browser);
             this.Controls.Add(this.toolStrip1);
             this.Name = "Form1";
@@ -134,8 +157,10 @@
         private System.Windows.Forms.ToolStripButton homeButton;
         private System.Windows.Forms.ToolStripTextBox urlBar;
         private System.Windows.Forms.ToolStripButton goButton;
-        private System.Windows.Forms.TextBox browser;
         protected System.Windows.Forms.ToolStripButton forwardButton;
+        private System.Windows.Forms.RichTextBox browser;
+        private System.Windows.Forms.Button searchText;
+        private System.Windows.Forms.Button navigateLink;
     }
 }
 
